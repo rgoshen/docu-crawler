@@ -23,12 +23,36 @@ DEFAULTS = {
     'project': None,
     'credentials': None,
     'single_file': False,
-    'frontmatter': False
+    'frontmatter': False,
+    'sftp_port': 22
 }
 
 def args_to_dict(args: argparse.Namespace) -> Dict[str, Any]:
     """Convert argparse namespace to a dictionary."""
     return {k: v for k, v in vars(args).items() if k != 'config'}
+
+def resolve_params(config: Dict[str, Any], args_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Resolve the effective settings from a config file and command line arguments.
+
+    Precedence, highest first: explicit CLI argument, config file, DEFAULTS. An
+    argument the user did not supply is None, which is what lets a config file
+    value survive the merge.
+
+    Args:
+        config: Settings loaded from a config file
+        args_dict: Parsed command line arguments
+
+    Returns:
+        The effective settings, with every DEFAULTS key present
+    """
+    params = merge_config_and_args(config, args_dict)
+
+    for key, value in DEFAULTS.items():
+        if params.get(key) is None:
+            params[key] = value
+
+    return params
 
 def run():
     """Main function to run the docu crawler from CLI."""
@@ -43,12 +67,8 @@ def run():
     if args_dict.get('use_gcs'):
         args_dict['storage_type'] = 'gcs'
     
-    params = merge_config_and_args(config, args_dict)
-    
-    for key, value in DEFAULTS.items():
-        if params.get(key) is None:
-            params[key] = value
-    
+    params = resolve_params(config, args_dict)
+
     # validate URL is present and not empty
     url = params.get('url')
     if not url or not isinstance(url, str) or not url.strip():
