@@ -20,19 +20,18 @@ def parse_args() -> argparse.Namespace:
                         help='Maximum number of pages to download (0 for unlimited, default: 0)')
     parser.add_argument('--timeout', type=int,
                         help='Request timeout in seconds (default: 10)')
-    parser.add_argument('--single-file', action='store_true',
+    parser.add_argument('--single-file', action='store_true', default=None,
                         help='Combine all crawled pages into a single Markdown file (default: False)')
-    parser.add_argument('--frontmatter', action='store_true',
+    parser.add_argument('--frontmatter', action='store_true', default=None,
                         help='Add YAML frontmatter to Markdown files (default: False)')
     
     storage_group = parser.add_argument_group('Storage options')
     storage_group.add_argument('--storage-type', 
                               choices=['local', 'gcs', 's3', 'azure', 'sftp'],
-                              default='local',
                               help='Storage backend type (default: local)')
     
     gcs_group = parser.add_argument_group('Google Cloud Storage options')
-    gcs_group.add_argument('--use-gcs', action='store_true',
+    gcs_group.add_argument('--use-gcs', action='store_true', default=None,
                            help='Store files in Google Cloud Storage (deprecated: use --storage-type gcs)')
     gcs_group.add_argument('--bucket', 
                            help='GCS bucket name (required if using GCS)')
@@ -62,7 +61,7 @@ def parse_args() -> argparse.Namespace:
                             help='SFTP username (required if --storage-type sftp)')
     sftp_group.add_argument('--sftp-password',
                             help='SFTP password (optional if using key file)')
-    sftp_group.add_argument('--sftp-port', type=int, default=22,
+    sftp_group.add_argument('--sftp-port', type=int,
                             help='SFTP port (default: 22)')
     sftp_group.add_argument('--sftp-key-file',
                             help='Path to SSH private key file')
